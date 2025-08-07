@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combo Emprendedor - Rifa</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .main-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #feca57;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .prize-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        }
+
+        .prize-details {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .prize-details h3 {
+            color: #48dbfb;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .prize-details p {
+            line-height: 1.6;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #feca57;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #feca57;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .ticket-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .ticket-number {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #48dbfb;
+        }
+
+        .ticket-status {
+            background: #4ecdc4;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .ticket-status.sold {
+            background: #ff6b6b;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            width: 45%;
+            border-radius: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #feca57;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .main-title {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+
+        .verification-result {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #4caf50;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .payment-method {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎁</div>
+            <h1 class="main-title">COMBO EMPRENDEDOR</h1>
+        </div>
+
+        <div class="content-grid">
+            <!-- Detalles de la Rifa -->
+            <div class="section">
+                <h2>Detalles de la Rifa</h2>
+                <div class="prize-image">
+                    <span>🎯 Premio Principal 🎯</span>
+                </div>
+                <div class="prize-details">
+                    <h3>Gran Premio Emprendedor</h3>
+                    <p><strong>Incluye:</strong></p>
+                    <p>• Kit completo de herramientas digitales</p>
+                    <p>• Curso de marketing digital avanzado</p>
+                    <p>• Asesorías personalizadas por 3 meses</p>
+                    <p>• Plantillas y recursos exclusivos</p>
+                    <p>• Acceso a comunidad VIP</p>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number">1,000</div>
+                        <div class="stat-label">Total Tickets</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">450</div>
+                        <div class="stat-label">Vendidos</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">$50</div>
+                        <div class="stat-label">Por Ticket</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">15 días</div>
+                        <div class="stat-label">Restantes</div>
+                    </div>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p style="text-align: center; color: #e0e0e0;">45% de tickets vendidos</p>
+            </div>
+
+            <!-- Verificar y Comprar Tickets -->
+            <div class="section">
+                <h2>Verifica Tus TICKETS</h2>
+                
+                <div class="form-group">
+                    <label for="ticket-number">Número de Ticket a Verificar:</label>
+                    <input type="text" id="ticket-number" placeholder="Ingresa el número de tu ticket">
+                </div>
+                <button class="btn" onclick="verifyTicket()">🔍 Verificar Ticket</button>
+                <div id="verification-result"></div>
+
+                <hr style="margin: 40px 0; border: 1px solid rgba(255,255,255,0.1);">
+
+                <h2>Comprar Tickets</h2>
+                
+                <div class="form-group">
+                    <label for="quantity">Cantidad de Tickets:</label>
+                    <select id="quantity">
+                        <option value="1">1 Ticket - $50</option>
+                        <option value="2">2 Tickets - $100</option>
+                        <option value="3">3 Tickets - $150</option>
+                        <option value="5">5 Tickets - $250</option>
+                        <option value="10">10 Tickets - $500</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="name">Nombre Completo:</label>
+                    <input type="text" id="name" placeholder="Tu nombre completo">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" placeholder="tu@email.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Teléfono:</label>
+                    <input type="tel" id="phone" placeholder="Tu número de teléfono">
+                </div>
+                
+                <div class="payment-methods">
+                    <div class="payment-method">💳 Tarjeta</div>
+                    <div class="payment-method">🏦 Transferencia</div>
+                    <div class="payment-method">📱 PayPal</div>
+                    <div class="payment-method">💰 Efectivo</div>
+                </div>
+                
+                <button class="btn" onclick="buyTickets()">🎫 Comprar Tickets</button>
+                
+                <div style="margin-top: 20px; font-size: 0.9rem; color: #e0e0e0; text-align: center;">
+                    <p>Sorteo válido hasta el 31 de Diciembre, 2024</p>
+                    <p>Los números ganadores se anunciarán en vivo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function verifyTicket() {
+            const ticketNumber = document.getElementById('ticket-number').value;
+            const resultDiv = document.getElementById('verification-result');
+            
+            if (!ticketNumber) {
+                alert('Por favor ingresa un número de ticket');
+                return;
+            }
+            
+            // Simulación de verificación
+            const isValid = Math.random() > 0.3; // 70% chance de ser válido
+            
+            if (isValid) {
+                resultDiv.innerHTML = `
+                    <div class="verification-result">
+                        ✅ Ticket #${ticketNumber} es VÁLIDO
+                        <br>Estado: Pagado y Confirmado
+                        <br>Fecha de compra: ${new Date().toLocaleDateString()}
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="verification-result" style="background: rgba(244, 67, 54, 0.2); border-color: #f44336; color: #f44336;">
+                        ❌ Ticket #${ticketNumber} no encontrado
+                        <br>Verifica el número e intenta nuevamente
+                    </div>
+                `;
+            }
+        }
+        
+        function buyTickets() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const quantity = document.getElementById('quantity').value;
+            
+            if (!name || !email || !phone) {
+                alert('Por favor completa todos los campos requeridos');
+                return;
+            }
+            
+            const total = quantity * 50;
+            const ticketNumbers = [];
+            for (let i = 0; i < quantity; i++) {
+                ticketNumbers.push(Math.floor(Math.random() * 1000) + 1);
+            }
+            
+            alert(`¡Compra iniciada!
+            
+Resumen:
+- Tickets: ${quantity}
+- Total: $${total}
+- Números asignados: ${ticketNumbers.join(', ')}
+
+Te contactaremos para confirmar el pago.
+¡Gracias por participar!`);
+        }
+        
+        // Animación de números
+        function animateNumber(element, start, end, duration) {
+            const startTime = performance.now();
+            
+            function updateNumber(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const currentNumber = Math.floor(start + (end - start) * progress);
+                
+                element.textContent = currentNumber.toLocaleString();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateNumber);
+                }
+            }
+            
+            requestAnimationFrame(updateNumber);
+        }
+        
+        // Inicializar animaciones cuando la página carga
+        window.onload = function() {
+            const statNumbers = document.querySelectorAll('.stat-number');
+            const values = [1000, 450, 50, 15];
+            
+            statNumbers.forEach((element, index) => {
+                if (index < 3) {
+                    animateNumber(element, 0, values[index], 2000);
+                } else {
+                    element.textContent = values[index];
+                }
+            });
+        };
+    </script>
+</body>
+</html>
