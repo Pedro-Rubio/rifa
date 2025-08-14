@@ -1,0 +1,16 @@
+{
+  "name": "rifa-web",
+  "version": "1.0.0",
+  "description": "Sistema de rifas con React, Supabase y Vercel",
+  "main": "index.js",
+  "scripts": {
+    "admin": "node scripts/create-admin.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2",
+    "bcrypt": "^5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

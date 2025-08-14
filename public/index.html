@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rifa Online</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    .ticket-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+    }
+    .ticket-number {
+      @apply text-xs text-center p-1 bg-gray-100 rounded;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const App = () => {
+      const [raffle, setRaffle] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState('');
+      const [form, setForm] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        quantity: 1,
+        paymentMethod: ''
+      });
+      const [step, setStep] = useState(1); // 1: form, 2: instructions, 3: upload
+      const [instructions, setInstructions] = useState('');
+      const [ticketNumbers, setTicketNumbers] = useState([]);
+      const [uploadUrl, setUploadUrl] = useState('');
+      const [file, setFile] = useState(null);
+
+      useEffect(() => {
+        fetch('/api/raffles/current')
+          .then(r => r.json())
+          .then(data => {
+            if (data.error) setError(data.error);
+            else setRaffle(data);
+          })
+          .catch(() => setError('Error al cargar la rifa'))
+          .finally(() => setLoading(false));
+      }, []);
+
+      const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+      };
+
+      const handlePaymentMethod = (method) => {
+        setForm({ ...form, paymentMethod: method });
+        const methodData = raffle.payment_methods.find(m => m.id === method);
+        setInstructions(methodData?.instructions || '');
+      };
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!form.paymentMethod) {
+          alert('Selecciona un método de pago');
+          return;
+        }
+
+        fetch('/api/tickets/hold', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form)
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.error) {
+            alert('Error: ' + data.error);
+          } else {
+            setTicketNumbers(data.tickets.map(t => t.number));
+            setStep(2);
+          }
+        });
+      };
+
+      const handleUpload = () => {
+        if (!file) {
+          alert('Selecciona un archivo');
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        fetch(uploadUrl, {
+          method: 'PUT',
+          body: file,
+          headers: { 'Content-Type': file.type }
+        })
+        .then(() => {
+          alert('Comprobante subido. Espera confirmación del administrador.');
+          setStep(3);
+        })
+        .catch(() => alert('Error al subir comprobante'));
+      };
+
+      if (loading) return <div className="flex justify-center p-10">Cargando...</div>;
+      if (error) return <div className="text-red-600 p-4 text-center">{error}</div>;
+
+      return (
+        <div className="max-w-4xl mx-auto p-6">
+          <h1 className="text-3xl font-bold text-center mb-2 text-purple-700">{raffle.title}</h1>
+          <p className="text-center text-gray-600 mb-6">{raffle.prize}</p>
+
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-6">
+              <div>
+                <div className="text-2xl">{raffle.emoji}</div>
+                <div className="text-sm text-gray-500">Precio</div>
+                <div className="font-bold">${raffle.price}</div>
+              </div>
+              <div>
+                <div className="text-2xl">🎟️</div>
+                <div className="text-sm text-gray-500">Total</div>
+                <div className="font-bold">{raffle.total_tickets}</div>
+              </div>
+              <div>
+                <div className="text-2xl">✅</div>
+                <div className="text-sm text-gray-500">Vendidos</div>
+                <div className="font-bold">{raffle.sold_tickets}</div>
+              </div>
+              <div>
+                <div className="text-2xl">⏳</div>
+                <div className="text-sm text-gray-500">Restantes</div>
+                <div className="font-bold text-green-600">{raffle.total_tickets - raffle.sold_tickets}</div>
+              </div>
+            </div>
+
+            {step === 1 && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input name="name" placeholder="Nombre" required
+                    value={form.name} onChange={handleChange}
+                    className="border p-2 rounded" />
+                  <input name="email" type="email" placeholder="Email" required
+                    value={form.email} onChange={handleChange}
+                    className="border p-2 rounded" />
+                  <input name="phone" placeholder="Teléfono" required
+                    value={form.phone} onChange={handleChange}
+                    className="border p-2 rounded" />
+                  <select name="quantity" value={form.quantity} onChange={handleChange}
+                    className="border p-2 rounded">
+                    {[...Array(10)].map((_, i) => (
+                      <option key={i+1} value={i+1}>{i+1} ticket{i !== 0 ? 's' : ''}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <h3 className="font-bold mb-2">Método de Pago</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    {raffle.payment_methods.map(method => (
+                      <button
+                        type="button"
+                        key={method.id}
+                        onClick={() => handlePaymentMethod(method.id)}
+                        className={`p-3 rounded border-2 transition ${
+                          form.paymentMethod === method.id ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                        }`}
+                      >
+                        <div className="text-2xl">{method.emoji}</div>
+                        <div className="text-xs">{method.name}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full bg-purple-600 text-white py-3 rounded font-bold hover:bg-purple-700 transition"
+                >
+                  Iniciar Compra
+                </button>
+              </form>
+            )}
+
+            {step === 2 && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold">Tus tickets: {ticketNumbers.join(', ')}</h2>
+                <div className="bg-yellow-50 border border-yellow-200 p-4 rounded">
+                  <h3 className="font-bold text-yellow-800">Instrucciones de pago:</h3>
+                  <p className="text-sm text-yellow-700 whitespace-pre-line">{instructions}</p>
+                </div>
+
+                <div>
+                  <label className="block mb-2 font-medium">Sube tu comprobante</label>
+                  <input
+                    type="file"
+                    accept="image/*,.pdf"
+                    onChange={(e) => setFile(e.target.files[0])}
+                    className="border p-2 rounded w-full"
+                  />
+                  <button
+                    onClick={() => {
+                      fetch('/api/uploads/signed-url')
+                        .then(r => r.json())
+                        .then(data => {
+                          if (data.url) {
+                            setUploadUrl(data.url);
+                            setTimeout(handleUpload, 500); // Delay to ensure file is ready
+                          }
+                        });
+                    }}
+                    className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                  >
+                    Subir comprobante
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="text-center text-green-600">
+                <h2 className="text-xl font-bold">✅ Comprobante subido</h2>
+                <p>Tu pago será confirmado por el administrador.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
